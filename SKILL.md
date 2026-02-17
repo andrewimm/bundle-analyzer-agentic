@@ -1,3 +1,9 @@
+---
+name: analyze-bundle
+description: Convert Next.js bundle analyzer data to NDJSON and explore it
+allowed-tools: Bash(node *) Bash(head:*) Bash(tail:*) Bash(grep:*) Bash(jq:*) Read
+---
+
 # analyze-to-ndjson
 
 Converts Next.js bundle analyzer binary `.data` files into grep/jq-friendly NDJSON.
