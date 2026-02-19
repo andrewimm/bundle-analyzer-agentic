@@ -2,7 +2,7 @@
 // Converts Next.js bundle analyzer .data files to NDJSON for offline analysis.
 // Usage: node tools/analyze-to-ndjson.mjs [--input <dir>] [--output <dir>]
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, statSync, existsSync } from "fs";
 import { join, relative } from "path";
 
 // --- CLI args ---
@@ -132,9 +132,21 @@ function getSourceFlags(sourceIndex, sourceChunkPartsMap, chunkParts, outputFile
 function ndjsonWriter(filePath) {
   let buf = "";
   let count = 0;
+  const FLUSH_THRESHOLD = 50_000;
+  writeFileSync(filePath, "");
   return {
-    write(obj) { buf += JSON.stringify(obj) + "\n"; count++; },
-    flush() { writeFileSync(filePath, buf); return count; },
+    write(obj) {
+      buf += JSON.stringify(obj) + "\n";
+      count++;
+      if (buf.length > FLUSH_THRESHOLD) {
+        appendFileSync(filePath, buf);
+        buf = "";
+      }
+    },
+    flush() {
+      if (buf.length > 0) { appendFileSync(filePath, buf); buf = ""; }
+      return count;
+    },
   };
 }
 
